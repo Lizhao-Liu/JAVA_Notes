@@ -1,4 +1,4 @@
-# [link](https://github.com/drslock/JAVA2020/tree/main/Weekly%20Workbooks/01%20Introduction%20to%20Objects)
+> [workbooks](https://github.com/drslock/JAVA2020/tree/main/Weekly%20Workbooks/01%20Introduction%20to%20Objects)
 
 # Hello World
 > [code](https://github.com/Lizhao-Liu/JAVA_Notes/tree/main/week1/exer/Helloworld)
