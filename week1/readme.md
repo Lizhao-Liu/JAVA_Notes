@@ -1,6 +1,7 @@
 # [link](https://github.com/drslock/JAVA2020/tree/main/Weekly%20Workbooks/01%20Introduction%20to%20Objects)
 
-# [Hello World](https://github.com/Lizhao-Liu/JAVA_Notes/tree/main/week1/exer/Helloworld)
+# Hello World
+> [code](https://github.com/Lizhao-Liu/JAVA_Notes/tree/main/week1/exer/Helloworld)
 
 ```java
 package com.company;
@@ -61,7 +62,8 @@ class Triangle {
 -  "glue" separate Strings together in Java by using the + concatenation operator. Java will even let you concatenate different types together.
 
 
-# [TwoDimensionalShape](https://github.com/Lizhao-Liu/JAVA_Notes/tree/main/week1/exer/Triangle/src)
+# TwoDimensionalShape
+>[code](https://github.com/Lizhao-Liu/JAVA_Notes/tree/main/week1/exer/Triangle/src)
 ```java
 class Triangle extends TwoDimensionalShape{
     int x, y, z;
