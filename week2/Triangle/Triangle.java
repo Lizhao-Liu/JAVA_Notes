@@ -6,7 +6,7 @@ class Triangle extends TwoDimensionalShape implements MultiVariantShape{
         this.x = x;
         this.y = y;
         this.z = z;
-        Triangle.population++;
+        population++;
         if(x <= 0 || y <= 0 || z <= 0){
             this.variant = TriangleVariant.ILLEGAL;
         }
@@ -22,7 +22,6 @@ class Triangle extends TwoDimensionalShape implements MultiVariantShape{
             else{
                 this.variant = TriangleVariant.SCALENE;
             }
-
             if(Math.pow(x, 2)+Math.pow(y, 2) == Math.pow(z, 2) || Math.pow(x, 2)+Math.pow(z, 2) == Math.pow(y, 2) || Math.pow(y, 2)+Math.pow(z, 2) == Math.pow(x, 2)){
                 this.variant = TriangleVariant.RIGHT;
             }
@@ -51,7 +50,6 @@ class Triangle extends TwoDimensionalShape implements MultiVariantShape{
         return  "Triangle with sides of length " + x +", " + y +", " + z + "\nThis is a " + variant + " Triangle.";
     }
     double calculateArea() {
-
         double s;
         s = (double)(x + y + z) / 2;
         return Math.sqrt(s * (s - x) * (s - y)* (s - z));
@@ -78,3 +76,5 @@ class Triangle extends TwoDimensionalShape implements MultiVariantShape{
         }
     }
 }
+
+// class variable vs instance variable

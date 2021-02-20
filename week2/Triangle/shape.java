@@ -34,6 +34,10 @@ public class shape {
     }
 
 }
+//Static java: non-static method getPopulation() cannot be referenced from a static context
+
+
+
 //If you try to print out an instance of a class by passing it to println,
 // it will call the toString method of that object in order to get a printable string !
 // : shape 不能给array复制， 用指针的形式赋值。
