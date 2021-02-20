@@ -11,32 +11,34 @@ class OXOController
 
     public void handleIncomingCommand(String command) throws OXOMoveException
     {
-        int row = command.charAt(1) - '1';
-        int col = command.toLowerCase().charAt(0) - 'a';
-        if( command.length()>2){
-            throw new InvalidIdentifierLengthException(command.length());
+        if(gameModel.getWinner()==null){
+            int col = command.charAt(1) - '1';
+            int row = command.toLowerCase().charAt(0) - 'a';
+            if(command.length()>2){
+                throw new InvalidIdentifierLengthException(command.length());
+            }
+            if(row<0||row>9){
+                throw new InvalidIdentifierCharacterException(command.charAt(0), RowOrColumn.ROW);
+            }
+            if(col<0||col>9){
+                throw new InvalidIdentifierCharacterException(command.charAt(1), RowOrColumn.COLUMN);
+            }
+            if(row>=gameModel.getNumberOfRows()){
+                throw new OutsideCellRangeException(row, RowOrColumn.ROW);
+            }
+            if(col>=gameModel.getNumberOfColumns()){
+                throw new OutsideCellRangeException(col, RowOrColumn.COLUMN);
+            }
+            if(gameModel.getCellOwner(row, col).getPlayingLetter()!='\0'){
+                throw new CellAlreadyTakenException(row, col);
+            }
+            gameModel.setCellOwner(row, col, gameModel.getCurrentPlayer());
+            if(WinDetected(row, col, gameModel.getCurrentPlayer())){
+                gameModel.setWinner(gameModel.getCurrentPlayer());
+            }
+            gameModel.addAMovement();
+            gameModel.setCurrentPlayer(gameModel.getCurrentPlayer());
         }
-        if(row<0||row>9){
-            throw new InvalidIdentifierCharacterException(command.charAt(1), RowOrColumn.ROW);
-        }
-        if(col<0||col>9){
-            throw new InvalidIdentifierCharacterException(command.charAt(0), RowOrColumn.COLUMN);
-        }
-        if(row>=gameModel.getNumberOfRows()){
-            throw new OutsideCellRangeException(row, RowOrColumn.ROW);
-        }
-        if(col>=gameModel.getNumberOfColumns()){
-            throw new OutsideCellRangeException(col, RowOrColumn.COLUMN);
-        }
-        if(gameModel.getCellOwner(row, col)!=null){
-            throw new CellAlreadyTakenException(row, col);
-        }
-        gameModel.setCellOwner(row, col, gameModel.getCurrentPlayer());
-        if(WinDetected(row, col, gameModel.getCurrentPlayer())){
-            gameModel.setWinner(gameModel.getCurrentPlayer());
-        }
-        gameModel.addAMovement();
-        gameModel.setCurrentPlayer(gameModel.getNextPlayer());
     }
 
     boolean WinDetected(int row, int col, OXOPlayer currentPlayer){
@@ -51,7 +53,7 @@ class OXOController
             count++;
         }
         i = row+1;
-        while(row<gameModel.getNumberOfRows() && gameModel.getCellOwner(i, col).getPlayingLetter()==curr){
+        while(i<gameModel.getNumberOfRows() && gameModel.getCellOwner(i, col).getPlayingLetter()==curr){
             i++;
             count++;
         }
@@ -67,7 +69,7 @@ class OXOController
             count++;
         }
         i = col+1;
-        while(col<gameModel.getNumberOfColumns() && gameModel.getCellOwner(row, i).getPlayingLetter()==curr){
+        while(i<gameModel.getNumberOfColumns() && gameModel.getCellOwner(row, i).getPlayingLetter()==curr){
             i++;
             count++;
         }
@@ -122,7 +124,7 @@ class CellAlreadyTakenException extends OXOMoveException
         super(row, column);
     }
     public String toString() {
-        return "The cell at row: " + super.getRow() + " column: " + super.getColumn() + " is already taken";
+        return "The cell at row: " + (super.getRow()+1) + " column: " + (super.getColumn()+1) + " is already taken";
     }
 }
 
@@ -143,7 +145,7 @@ class OutsideCellRangeException extends CellDoesNotExistException
     }
 
     public String toString() {
-        return "The cell at " + type + position + " does not exist";
+        return "The cell at " + type + (position+1) + " does not exist";
     }
 }
 
@@ -160,7 +162,7 @@ class InvalidIdentifierLengthException extends InvalidIdentifierException{
     }
 
     public String toString() {
-        return "Invalid Identifier " + this.getMessage() + ": expected 2 characters, get " +length +" characters";
+        return "Invalid Identifier length: expected 2 characters, get " +length +" characters";
     }
 }
 

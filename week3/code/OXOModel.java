@@ -1,10 +1,10 @@
 import java.util.*;
 
-class OXOModel
+public class OXOModel
 {
     //private OXOPlayer cells[][];
-    private List<List<OXOPlayer>> cells;
-    private OXOPlayer players[];
+    private ArrayList<ArrayList<OXOPlayer>> cells;
+    private ArrayList<OXOPlayer> players;
     private OXOPlayer currentPlayer;
     private OXOPlayer winner;
     private boolean gameDrawn;
@@ -15,33 +15,51 @@ class OXOModel
     public OXOModel(int numberOfRows, int numberOfColumns, int winThresh)
     {
         winThreshold = winThresh;
-        cells = new ArrayList<List<OXOPlayer>>(numberOfRows);
+        cells = new ArrayList<ArrayList<OXOPlayer>>(numberOfRows);
         for(int i = 0; i < numberOfRows; i++) {
-            cells.add(new ArrayList<>(numberOfColumns));
+            ArrayList<OXOPlayer> row = new ArrayList<OXOPlayer>(numberOfColumns);
+            for(int j=0; j<numberOfColumns; j++){
+                row.add(j, new OXOPlayer('\0'));
+            }
+            cells.add(i, row);
         }
-        players = new OXOPlayer[2];
-        currentPlayer= players[0];
+        players = new ArrayList<>();
         movements = 0;
     }
 
     public int getNumberOfPlayers()
     {
-        return players.length;
+        return players.size();
     }
 
     public void addPlayer(OXOPlayer player)
     {
-        for(int i=0; i<players.length; i++) {
-            if(players[i] == null) {
-                players[i] = player;
-                return;
+        try{
+            checkDuplication(player);
+            players.add(player);
+        }catch(DuplicatePlayersException e){
+            System.out.println(e);
+        }
+
+//        for(int i=0; i<players.length; i++) {
+//            if(players[i] == null) {
+//                players[i] = player;
+//                return;
+//            }
+//        }
+    }
+    void checkDuplication(OXOPlayer player) throws DuplicatePlayersException{
+        for(int i=0; i<players.size(); i++){
+            if(players.get(i).getPlayingLetter()==player.getPlayingLetter()){
+                throw new DuplicatePlayersException(player);
             }
         }
+        return;
     }
 
     public OXOPlayer getPlayerByNumber(int number)
     {
-        return players[number];
+        return players.get(number);
     }
 
     public OXOPlayer getWinner()
@@ -56,18 +74,14 @@ class OXOModel
 
     public OXOPlayer getCurrentPlayer()
     {
+        int index = movements%(getNumberOfPlayers());
+        currentPlayer = players.get(index);
         return currentPlayer;
     }
 
     public void setCurrentPlayer(OXOPlayer player)
     {
         currentPlayer = player;
-    }
-
-    public OXOPlayer getNextPlayer()
-    {
-        int nextPlayer = movements%(this.getNumberOfPlayers());
-        return players[nextPlayer];
     }
 
     public void addAMovement()
@@ -112,6 +126,20 @@ class OXOModel
 
     public boolean isGameDrawn()
     {
+        if (movements==getNumberOfColumns()*getNumberOfRows()){
+            gameDrawn=true;
+        }
         return gameDrawn;
+    }
+
+}
+
+class DuplicatePlayersException extends Exception{
+    OXOPlayer player;
+    public DuplicatePlayersException(OXOPlayer player){
+        this.player = player;
+    }
+    public String toString(){
+        return "player "+ player.getPlayingLetter()+ " already exists.";
     }
 }
