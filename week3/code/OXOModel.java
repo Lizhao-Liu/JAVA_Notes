@@ -15,9 +15,9 @@ public class OXOModel
     public OXOModel(int numberOfRows, int numberOfColumns, int winThresh)
     {
         winThreshold = winThresh;
-        cells = new ArrayList<ArrayList<OXOPlayer>>(numberOfRows);
+        cells = new ArrayList<>(numberOfRows);
         for(int i = 0; i < numberOfRows; i++) {
-            ArrayList<OXOPlayer> row = new ArrayList<OXOPlayer>(numberOfColumns);
+            ArrayList<OXOPlayer> row = new ArrayList<>(numberOfColumns);
             for(int j=0; j<numberOfColumns; j++){
                 row.add(j, new OXOPlayer('\0'));
             }
@@ -38,23 +38,17 @@ public class OXOModel
             checkDuplication(player);
             players.add(player);
         }catch(DuplicatePlayersException e){
-            System.out.println(e);
+            System.out.println("AddPlayer failed: " + e);
         }
-
-//        for(int i=0; i<players.length; i++) {
-//            if(players[i] == null) {
-//                players[i] = player;
-//                return;
-//            }
-//        }
     }
-    void checkDuplication(OXOPlayer player) throws DuplicatePlayersException{
-        for(int i=0; i<players.size(); i++){
-            if(players.get(i).getPlayingLetter()==player.getPlayingLetter()){
+
+    void checkDuplication(OXOPlayer player) throws DuplicatePlayersException
+    {
+        for (OXOPlayer oxoPlayer : players) {
+            if (oxoPlayer.getPlayingLetter() == player.getPlayingLetter()) {
                 throw new DuplicatePlayersException(player);
             }
         }
-        return;
     }
 
     public OXOPlayer getPlayerByNumber(int number)
@@ -87,6 +81,11 @@ public class OXOModel
     public void addAMovement()
     {
         movements++;
+    }
+
+    public int getMovements()
+    {
+        return movements;
     }
 
     public int getNumberOfRows()
@@ -126,9 +125,6 @@ public class OXOModel
 
     public boolean isGameDrawn()
     {
-        if (movements==getNumberOfColumns()*getNumberOfRows()){
-            gameDrawn=true;
-        }
         return gameDrawn;
     }
 

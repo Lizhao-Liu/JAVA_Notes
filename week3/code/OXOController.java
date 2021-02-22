@@ -12,36 +12,46 @@ class OXOController
     public void handleIncomingCommand(String command) throws OXOMoveException
     {
         if(gameModel.getWinner()==null){
+            checkValidCommand(command);
             int col = command.charAt(1) - '1';
             int row = command.toLowerCase().charAt(0) - 'a';
-            if(command.length()>2){
-                throw new InvalidIdentifierLengthException(command.length());
-            }
-            if(row<0||row>9){
-                throw new InvalidIdentifierCharacterException(command.charAt(0), RowOrColumn.ROW);
-            }
-            if(col<0||col>9){
-                throw new InvalidIdentifierCharacterException(command.charAt(1), RowOrColumn.COLUMN);
-            }
-            if(row>=gameModel.getNumberOfRows()){
-                throw new OutsideCellRangeException(row, RowOrColumn.ROW);
-            }
-            if(col>=gameModel.getNumberOfColumns()){
-                throw new OutsideCellRangeException(col, RowOrColumn.COLUMN);
-            }
-            if(gameModel.getCellOwner(row, col).getPlayingLetter()!='\0'){
-                throw new CellAlreadyTakenException(row, col);
-            }
             gameModel.setCellOwner(row, col, gameModel.getCurrentPlayer());
-            if(WinDetected(row, col, gameModel.getCurrentPlayer())){
+            if(WinDetected(row, col)){
                 gameModel.setWinner(gameModel.getCurrentPlayer());
             }
             gameModel.addAMovement();
+            if(gameModel.getMovements()== gameModel.getNumberOfColumns()*gameModel.getNumberOfRows()){
+                gameModel.setGameDrawn();
+            }
             gameModel.setCurrentPlayer(gameModel.getCurrentPlayer());
         }
     }
 
-    boolean WinDetected(int row, int col, OXOPlayer currentPlayer){
+    void checkValidCommand(String command) throws OXOMoveException
+    {
+        if(command.length()!=2){
+            throw new InvalidIdentifierLengthException(command.length());
+        }
+        int col = command.charAt(1) - '1';
+        int row = command.toLowerCase().charAt(0) - 'a';
+        if(row<0||row>9){
+            throw new InvalidIdentifierCharacterException(command.charAt(0), RowOrColumn.ROW);
+        }
+        if(col<0||col>9){
+            throw new InvalidIdentifierCharacterException(command.charAt(1), RowOrColumn.COLUMN);
+        }
+        if(row>=gameModel.getNumberOfRows()){
+            throw new OutsideCellRangeException(row, RowOrColumn.ROW);
+        }
+        if(col>=gameModel.getNumberOfColumns()){
+            throw new OutsideCellRangeException(col, RowOrColumn.COLUMN);
+        }
+        if(gameModel.getCellOwner(row, col).getPlayingLetter()!='\0'){
+            throw new CellAlreadyTakenException(row, col);
+        }
+    }
+
+    boolean WinDetected(int row, int col){
         char curr = gameModel.getCellOwner(row, col).getPlayingLetter();
         int count = 0;
         int i ,j;
