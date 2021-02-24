@@ -17,7 +17,7 @@ Notes and exercises for the course Object Oriented Programming with Java
 
 # Progress
 - [X] [01 Introduction to Objects](https://github.com/drslock/JAVA2020/tree/main/Weekly%20Workbooks/01%20Introduction%20to%20Objects)
-  - [Notes]()
+  - [Notes](https://github.com/Lizhao-Liu/JAVA_Notes/tree/main/week1)
   
 - [ ] [02 Other Language Constructs](https://github.com/drslock/JAVA2020/tree/main/Weekly%20Workbooks/02%20Further%20Language%20Constructs)
   - [Notes]()
