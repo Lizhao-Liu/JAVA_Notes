@@ -19,5 +19,8 @@ Notes and exercises for the course Object Oriented Programming with Java
 - [X] [01 Introduction to Objects](https://github.com/drslock/JAVA2020/tree/main/Weekly%20Workbooks/01%20Introduction%20to%20Objects)
   - [Notes]()
   
-- [ ] [02 Introduction to Objects](https://github.com/drslock/JAVA2020/tree/main/Weekly%20Workbooks/02%20Further%20Language%20Constructs)
+- [ ] [02 Other Language Constructs](https://github.com/drslock/JAVA2020/tree/main/Weekly%20Workbooks/02%20Further%20Language%20Constructs)
+  - [Notes]()
+
+- [ ] [03 & 04 Polymorphism and Collections & Error Handling](https://github.com/drslock/JAVA2020/tree/main/Weekly%20Workbooks/03%20Polymorphism%20and%20Collections)
   - [Notes]()
