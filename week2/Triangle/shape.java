@@ -22,6 +22,9 @@ public class shape {
                 System.out.println("this is a "+ temp.variant + " triangle");
             }
         }
+        TwoDimensionalShape firstshape = shape[0];
+        Triangle firsttriangle = (Triangle)firstshape;
+        TriangleVariant variant = firsttriangle.getVariant();
 //        for (TwoDimensionalShape ncurr : shape){
 //            if (ncurr instanceof MultiVariantShape) {
 //                count++;
