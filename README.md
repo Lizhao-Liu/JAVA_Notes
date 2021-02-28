@@ -25,7 +25,7 @@ Notes and exercises for the course Object Oriented Programming with Java
 - [X] [03 & 04 Polymorphism and Collections & Error Handling](https://github.com/drslock/JAVA2020/tree/main/Weekly%20Workbooks/03%20Polymorphism%20and%20Collections)
   - [Notes](https://github.com/Lizhao-Liu/JAVA_Notes/tree/main/week3)
  
-- [ ] [05 Code Quality]()
+- [ ] [05 Code Quality](https://github.com/drslock/JAVA2020/tree/main/Weekly%20Workbooks/05%20Code%20Quality)
   - [Notes]()
 
 # Projects
