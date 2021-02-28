@@ -4,7 +4,7 @@
 ## Model-View-Controller
 ![image](https://github.com/Lizhao-Liu/JAVA_Notes/blob/main/week3/img/Screenshot%202021-02-27%20at%2023.47.54.png)
 
-## Notes
+## Using Collections
 
 ### dynamic data types
 - there are some dynamic data types (e.g. Queues, Stacks, Lists etc.) provided by some of the core Java libraries that allow us to store dynamically sized groups of Object
@@ -31,13 +31,22 @@ That's not the same as saying "it can directly search using index of the object"
 [Java队列（Queue）了解及使用](https://www.jianshu.com/p/7a86c56c632b)
 
 
+## 异常（error handling）
+- `try {...} catch(Exception 3){...}` can handle errors without the program breaking.
+- 如果必须调用一个声明会抛出异常的函数，那么必须： 1. 把函数的调用放到try catch block中，设置catch来捕捉所有可能抛出的异常； 2. 声明自己会抛出无法处理的异常
+- business logic (如何使代码更加整洁）
+
+## Inheritance Hierarchy
+- if a method overrides one of its parent class's methods, invoke the overhidden method or the shadowed field using `super`.
+- in constructor method, `super`(should be put on the first line) refers to the particular parent constructor method.
+- 
+### UNIFIED MODELLING LANGUAGE(UML)
+![image](https://github.com/Lizhao-Liu/JAVA_Notes/blob/main/week3/img/Screenshot%202021-02-28%20at%2000.42.32.png)
+
+
 ### 构造函数与默认构造函数
 
 当有多个构造函数存在时，需要注意，在创建子类对象、调用构造函数时，如果在构造函数中没有特意声明，调用哪个父类的构造函数，则默认调用父类的无参构造函数（通常编译器会自动在子类构造函数的第一行加上super()方法）。
 
 如果父类没有无参构造函数，或想调用父类的有参构造方法，则需要在子类构造函数的第一行用super()方法，声明调用父类的哪个构造函数。
 
-### 异常（error handling）
-- `try {...} catch(Exception 3){...}` can handle errors without the program breaking.
-- 如果必须调用一个声明会抛出异常的函数，那么必须： 1. 把函数的调用放到try catch block中，设置catch来捕捉所有可能抛出的异常； 2. 声明自己会抛出无法处理的异常
-- 
