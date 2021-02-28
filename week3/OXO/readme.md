@@ -1,4 +1,4 @@
-# Project 1
+# OXO GAME
 
 ••Build a digital version of the classic turn-taking game "Noughts and Crosses" / "Tic-Tac-Toe" / "OXO"••
 
