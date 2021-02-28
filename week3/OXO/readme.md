@@ -17,4 +17,4 @@
 - [OXOGameTester](https://github.com/Lizhao-Liu/JAVA_Notes/blob/main/week3/OXO/OXOGameTester.java)
 
 ### Output
-
+![image](https://github.com/Lizhao-Liu/JAVA_Notes/blob/main/week3/img/ezgif-2-75a7e4f8d65a.gif)
