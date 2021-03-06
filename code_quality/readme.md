@@ -59,10 +59,11 @@ Possible improvements:
 - Line similarity: Similar duplicated lines of code
 - Method similarity: "Self plagiarism" of methods
 
+
 [naive implementation](https://github.com/drslock/JAVA2020/blob/main/Weekly%20Workbooks/05%20Code%20Quality/code/NaiveCalculator/NaiveCalculator.java)
 
 [ more refined solution ](https://github.com/drslock/JAVA2020/blob/main/Weekly%20Workbooks/05%20Code%20Quality/code/RefinedCalculator/RefinedCalculator.java)
 
- ** Avoid Redundant Code
+ ** Avoid Redundant Code **
  
  
