@@ -27,7 +27,7 @@ Notes and exercises for the course Object Oriented Programming with Java
  
 - [ ] [05 Code Quality](https://github.com/drslock/JAVA2020/tree/main/Weekly%20Workbooks/05%20Code%20Quality)
   - [Notes](https://github.com/Lizhao-Liu/JAVA_Notes/tree/main/code_quality)
-  - 
+ 
 - [ ] [06 DB Assignment](https://github.com/drslock/JAVA2020/tree/main/Weekly%20Workbooks/06%20Briefing%20on%20DB%20assignment)
   - [Notes]()
 
