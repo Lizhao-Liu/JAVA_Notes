@@ -16,6 +16,7 @@
 ![image](https://github.com/Lizhao-Liu/JAVA_Notes/blob/main/code_quality/Screenshot%202021-03-06%20at%2015.32.42.png)
 <div align="center"> CC = E - N + 2 </div>
 Example:
+
 ```java
 String[] folderContent;      // Initialised elsewhere
 Colour[] originalColours;    // Initialised elsewhere
