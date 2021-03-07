@@ -17,13 +17,13 @@ Notes and exercises for the course Object Oriented Programming with Java
 
 # Progress
 - [X] [01 Introduction to Objects](https://github.com/drslock/JAVA2020/tree/main/Weekly%20Workbooks/01%20Introduction%20to%20Objects)
-  - [Notes](https://github.com/Lizhao-Liu/JAVA_Notes/tree/main/week1)
+  - [Notes](https://github.com/Lizhao-Liu/JAVA_Notes/tree/main/Introduction%20to%20Objects)
   
 - [X] [02 Other Language Constructs](https://github.com/drslock/JAVA2020/tree/main/Weekly%20Workbooks/02%20Further%20Language%20Constructs)
-  - [Notes](https://github.com/Lizhao-Liu/JAVA_Notes/tree/main/week2)
+  - [Notes](https://github.com/Lizhao-Liu/JAVA_Notes/tree/main/Other%20Language%20Constructs)
 
 - [X] [03 & 04 Polymorphism and Collections & Error Handling](https://github.com/drslock/JAVA2020/tree/main/Weekly%20Workbooks/03%20Polymorphism%20and%20Collections)
-  - [Notes](https://github.com/Lizhao-Liu/JAVA_Notes/tree/main/week3)
+  - [Notes](https://github.com/Lizhao-Liu/JAVA_Notes/tree/main/Polymorphism%20and%20Collections%20%26%20Error%20Handling)
  
 - [ ] [05 Code Quality](https://github.com/drslock/JAVA2020/tree/main/Weekly%20Workbooks/05%20Code%20Quality)
   - [Notes](https://github.com/Lizhao-Liu/JAVA_Notes/tree/main/code_quality)
@@ -32,4 +32,4 @@ Notes and exercises for the course Object Oriented Programming with Java
   - [Notes]()
 
 # Projects
-- [X] [OXO Game](https://github.com/Lizhao-Liu/JAVA_Notes/tree/main/week3/OXO)
+- [X] [OXO Game](https://github.com/Lizhao-Liu/JAVA_Notes/tree/main/Polymorphism%20and%20Collections%20%26%20Error%20Handling/OXO)
