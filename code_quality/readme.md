@@ -67,4 +67,17 @@ Possible improvements:
 
  **Avoid Redundant Code**
  
+ ## Structural Quality
+ - cohesion
+ - coupling
+ - cyclic dependency
+ - global referencing
+
+## Code decay
+- When a method gets too long or complex... ...split into sub methods
+- If you see a lot of duplication......factor code into versatile method & parameterise
+- When a class gets too long......split it into two coherent classes
+- If you have a cyclic dependency... ...redistribute methods and responsibility
+ 
+ 
  
