@@ -2,7 +2,7 @@
 > Your aim in this assignment is to build a digital version of the classic turn-taking game "Noughts and Crosses" / "Tic-Tac-Toe" / "OXO". You will not be required to construct the entire game. 
 
 ## Model-View-Controller
-![image](https://github.com/Lizhao-Liu/JAVA_Notes/blob/main/week3/img/Screenshot%202021-02-27%20at%2023.47.54.png)
+![image](https://github.com/Lizhao-Liu/JAVA_Notes/blob/main/Polymorphism%20and%20Collections%20%26%20Error%20Handling/img/Screenshot%202021-02-27%20at%2023.47.54.png)
 
 ## Using Collections
 
@@ -14,7 +14,7 @@
 - solve downcasting problem
 
 ### Collections
-![image](https://github.com/Lizhao-Liu/JAVA_Notes/blob/main/week3/img/Screenshot%202021-02-28%20at%2000.21.10.png)
+![image](https://github.com/Lizhao-Liu/JAVA_Notes/blob/main/Polymorphism%20and%20Collections%20%26%20Error%20Handling/img/Screenshot%202021-02-28%20at%2000.21.10.png)
 
 ### Using an Interface as a Type
 
@@ -41,7 +41,7 @@ That's not the same as saying "it can directly search using index of the object"
 - in constructor method, `super`(should be put on the first line) refers to the particular parent constructor method.
 - 
 ### UNIFIED MODELLING LANGUAGE(UML)
-![image](https://github.com/Lizhao-Liu/JAVA_Notes/blob/main/week3/img/Screenshot%202021-02-28%20at%2000.42.32.png)
+![image](https://github.com/Lizhao-Liu/JAVA_Notes/blob/main/Polymorphism%20and%20Collections%20%26%20Error%20Handling/img/Screenshot%202021-02-28%20at%2000.42.32.png)
 
 
 ### 构造函数与默认构造函数
