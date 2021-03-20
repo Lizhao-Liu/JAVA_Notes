@@ -1,0 +1,491 @@
+package parse;
+import exception.ParseCommandException;
+import parse.command.*;
+import parse.command.Where.Condition;
+import parse.command.Where.SingleExpr;
+import parse.command.common.NameValuePair;
+import parse.command.common.Value;
+
+import java.util.ArrayList;
+import java.util.Stack;
+
+public class Parser {
+    private Tokenizer tokenizer;
+
+    public Parser(String incomingStatement){ this.tokenizer = new Tokenizer(incomingStatement); }
+    public CommandType getCommand() throws ParseCommandException{
+        try{
+            return parseCommand();
+        }catch (NullPointerException e){
+            throw new ParseCommandException("query terminates unexpectedly");
+        }
+    }
+   public CommandType parseCommand() throws ParseCommandException
+    {
+        Token token = tokenizer.nextToken();
+        if(token.isEmpty){throw new ParseCommandException("invalid query: empty string");}
+        switch(token.getContent().toUpperCase()){
+            case "USE":
+                return parseUse();
+            case "CREATE":
+                return parseCreate();
+            case "DROP":
+                return parseDrop();
+            case "ALTER":
+                return parseAlter();
+            case "INSERT":
+                return parseInsert();
+            case "SELECT":
+                return parseSelect();
+            case "DELETE":
+                return parseDelete();
+            case "UPDATE":
+                return parseUpdate();
+            case "JOIN":
+                return parseJoin();
+            default:
+                throw new ParseCommandException("invalid Command");
+        }
+    }
+    //BNF: USE <DatabaseName>
+    CommandType parseUse() throws ParseCommandException
+    {
+        Use use = new Use();
+        use.setDbName(getAName(tokenizer.nextToken()));
+        getTerminator(tokenizer.nextToken());
+        return use;
+    }
+
+    //BNF: <CreateDatabase> | <CreateTable>
+    CommandType parseCreate() throws ParseCommandException
+    {
+        Token token = tokenizer.nextToken();
+        if (token.getContent().equalsIgnoreCase("DATABASE")) {
+            return parseCreateDatabase();
+        }
+        else if(token.getContent().equalsIgnoreCase("TABLE")){
+            return parseCreateTable();
+        }
+        else {
+            throw new ParseCommandException("invalid query");
+        }
+    }
+
+    //BNF:CREATE DATABASE <DatabaseName>
+    CommandType parseCreateDatabase() throws ParseCommandException
+    {
+        CreateDatabase createDB = new CreateDatabase();
+        createDB.setDbName(getAName(tokenizer.nextToken()));
+        getTerminator(tokenizer.nextToken());
+        return createDB;
+    }
+
+    //BNF:CREATE TABLE <TableName> |
+    //    CREATE TABLE <TableName> ( <AttributeList> )
+    CommandType parseCreateTable() throws ParseCommandException
+    {
+        CreateTable createTable = new CreateTable();
+        createTable.setTableName(getAName(tokenizer.nextToken()));
+        if(tokenizer.peek().getContent().equals("(")){
+            tokenizer.nextToken();
+            createTable.setAttrList(getAttrList(")"));
+        }
+        getTerminator(tokenizer.nextToken());
+        return createTable;
+    }
+
+    //BNF: DROP <Structure> <StructureName>
+    CommandType parseDrop() throws ParseCommandException
+    {
+        Drop drop = new Drop();
+        Token token = tokenizer.nextToken();
+        if(token.getContent().equalsIgnoreCase("DATABASE")){
+            drop.setType(Drop.StructureType.database);
+        }
+        else if(token.getContent().equalsIgnoreCase("TABLE")){
+            drop.setType(Drop.StructureType.table);
+        }
+        else{
+            throw new ParseCommandException("invalid structure type");
+        }
+        drop.setName(getAName(tokenizer.nextToken()));
+        getTerminator(tokenizer.nextToken());
+        return drop;
+    }
+
+    //BNF: ALTER TABLE <TableName> <AlterationType> <AttributeName>
+    CommandType parseAlter() throws ParseCommandException
+    {
+        Alter alter = new Alter();
+        getKeyword("TABLE");
+        alter.setTableName(getAName(tokenizer.nextToken()));
+
+        //parse alteration type
+        Token token = tokenizer.nextToken();
+        if(token.getContent().equalsIgnoreCase("ADD")){
+            alter.setType(Alter.AlterationType.ADD);
+        }
+        else if(token.getContent().equalsIgnoreCase("DROP")){
+            alter.setType(Alter.AlterationType.DROP);
+        }
+        else{
+            throw new ParseCommandException("invalid query: missing alteration type");
+        }
+
+        alter.setColumnName(getAName(tokenizer.nextToken()));
+        getTerminator(tokenizer.nextToken());
+        return alter;
+    }
+
+    //BNF: INSERT INTO <TableName> VALUES ( <ValueList> )
+    CommandType parseInsert() throws ParseCommandException
+    {
+        Insert insert = new Insert();
+        getKeyword("INTO");
+        insert.setTableName(getAName(tokenizer.nextToken()));
+        getKeyword("VALUES");
+        getKeyword("(");
+        insert.setValueList(getValueList(")"));
+        getTerminator(tokenizer.nextToken());
+        return insert;
+    }
+
+    //SELECT <WildAttribList> FROM <TableName> |
+    //SELECT <WildAttribList> FROM <TableName> WHERE <Condition>
+    CommandType parseSelect() throws ParseCommandException
+    {
+        Select select = new Select();
+        //parse WildAttribList
+        if(tokenizer.peek().getContent().equals("*")){
+            tokenizer.nextToken();
+            getKeyword("FROM");
+            select.setSelectAllCols();
+        }
+        else{
+            select.setColumnList(getAttrList("FROM"));
+        }
+        select.setTableName(getAName(tokenizer.nextToken()));
+        Token token = tokenizer.peek();
+        if(token.isEndSymbol && tokenizer.peek(2).isEmpty){getTerminator(tokenizer.nextToken());}
+        else if (token.getContent().equalsIgnoreCase("WHERE")){
+            tokenizer.nextToken();
+            select.setCondition(getCondition());
+            getTerminator(tokenizer.nextToken());
+        }
+        else {throw new ParseCommandException("invalid query: "+ token.getContent()+  " unexpected, add ; to terminate or use WHERE for conditions");}
+        return select;
+    }
+
+    //DELETE FROM <TableName> WHERE <Condition>
+    CommandType parseDelete() throws ParseCommandException
+    {
+        Delete delete = new Delete();
+        getKeyword("FROM");
+        delete.setTableName(getAName(tokenizer.nextToken()));
+        getKeyword("WHERE");
+        delete.setCondition(getCondition());
+        getTerminator(tokenizer.nextToken());
+        return delete;
+    }
+
+    //UPDATE <TableName> SET <NameValueList> WHERE <Condition>
+    CommandType parseUpdate() throws ParseCommandException
+    {
+        Update update = new Update();
+        update.setTableName(getAName(tokenizer.nextToken()));
+        getKeyword("SET");
+        update.setNameValuePairs(getNameValueList("WHERE"));
+        update.setCondition(getCondition());
+        getTerminator(tokenizer.nextToken());
+        return update;
+    }
+
+    //BNF: JOIN <TableName> AND <TableName> ON <AttributeName> AND <AttributeName>
+    CommandType parseJoin() throws ParseCommandException
+    {
+        Join join = new Join();
+        join.setTableName1(getAName(tokenizer.nextToken()));
+        getKeyword("AND");
+        join.setTableName2(getAName(tokenizer.nextToken()));
+        getKeyword("ON");
+        join.setColumnName1(getAName(tokenizer.nextToken()));
+        getKeyword("AND");
+        join.setColumnName2(getAName(tokenizer.nextToken()));
+        getTerminator(tokenizer.nextToken());
+        return join;
+    }
+
+
+
+    //          ****************************AUXILIARY FUNCTIONS****************************
+    void getKeyword(String keyword) throws ParseCommandException
+    {
+        if(!tokenizer.nextToken().getContent().equalsIgnoreCase(keyword)) {
+            throw new ParseCommandException("invalid query: missing keyword: "+keyword);
+        }
+    }
+    String getAName(Token token) throws ParseCommandException
+    {
+        if(!token.isAlphanumeric){
+            throw new ParseCommandException("invalid column/table/database name");
+        }
+        return token.getContent();
+    }
+    void getTerminator(Token token) throws ParseCommandException
+    {
+        if(token.isEndSymbol){
+            System.out.println("[OK]");
+        }
+        else{
+            throw new ParseCommandException("terminator missing");
+        }
+    }
+    // BNF: ( <Condition> ) AND ( <Condition> )  |
+    //      ( <Condition> ) OR ( <Condition> )   |
+    //      <AttributeName> <Operator> <Value>
+    Condition getCondition() throws ParseCommandException
+    {
+        ArrayList<Object> conditionList = getConditionList();
+        return new Condition(conditionList);
+    }
+
+    ArrayList<Object> getConditionList() throws ParseCommandException
+    {
+        Stack stack = new Stack();
+        ArrayList<Object> recordList = new ArrayList<>();
+        Token curr;
+        int pos=0, separator=0;
+        while(!(curr=tokenizer.peek()).isEndSymbol){
+            tokenizer.nextToken();
+            if(curr.isEmpty){
+                throw new ParseCommandException("invalid query: expected ;");
+            }
+            if(curr.getContent().equals("(")){
+                stack.push("(");
+                recordList.add("(");
+                pos++;
+                continue;
+            }
+            if(curr.getContent().equals(")")){
+                if(stack.isEmpty()){throw new ParseCommandException("invalid query: brackets not match");}
+                recordList.add(")");
+                pos++;
+                stack.pop();
+                continue;
+            }
+            if(curr.getContent().equalsIgnoreCase("AND")||curr.getContent().equalsIgnoreCase("OR")){
+                if(stack.isEmpty()){
+                    if(separator!=0) throw new ParseCommandException("missing brackets");
+                    separator = pos;
+                }
+                recordList.add(curr.getContent());
+                pos++;
+            }
+            else if(curr.isAlphanumeric){
+                recordList.add(getSingleExpr(curr));
+                pos++;
+            }
+            else throw new ParseCommandException("invalid query, unexpected "+ curr.getContent());
+        }
+        if(!stack.isEmpty()) throw new ParseCommandException("invalid query: brackets not match");
+        return recordList;
+    }
+
+    SingleExpr getSingleExpr(Token token) throws ParseCommandException {
+        SingleExpr singleExpr = new SingleExpr();
+        singleExpr.setColumnName(getAName(token));
+        singleExpr.setOperator(getOperator(tokenizer.nextToken()));
+        singleExpr.setValue(setUpValue(tokenizer.nextToken()));
+        return singleExpr;
+    }
+
+    SingleExpr.OperatorType getOperator(Token token) throws ParseCommandException
+    {
+        if(token.getContent().equals("LIKE")){
+            String next = tokenizer.peek().getContent();
+            if(isIntegerLiteral(next)||isFloatLiteral(next)){
+                throw new ParseCommandException("Invalid query: String expected after LIKE");
+            }
+            return SingleExpr.OperatorType.LIKE;
+        }
+        if(!token.isSymbol) throw new ParseCommandException("invalid query: no operator found");
+        String operator = token.getContent();
+        while((token = tokenizer.peek()).isSymbol && !token.isEndSymbol){
+            operator += token.getContent();
+            tokenizer.nextToken();
+        }
+        return getSymbolOperator(operator);
+    }
+
+    SingleExpr.OperatorType getSymbolOperator(String s) throws ParseCommandException
+    {
+        if(s.equals("==")){return SingleExpr.OperatorType.EQUAL;}
+        if(s.equals(">")) {return SingleExpr.OperatorType.GREATER;}
+        if(s.equals("<")){return SingleExpr.OperatorType.LESS;}
+        if(s.equals(">=")){return SingleExpr.OperatorType.EQUALORGREATER;}
+        if(s.equals("<=")){return SingleExpr.OperatorType.EQUALORLESS;}
+        if(s.equals("!=")){return SingleExpr.OperatorType.NOTEQUAL;}
+        throw new ParseCommandException("invalid query: expected an operator but found "+ s);
+    }
+
+    ArrayList<String> getAttrList(String endOfList) throws ParseCommandException
+    {
+        ArrayList<String> attrList = new ArrayList<>();
+        //curr starts at the first string of the attribute list
+        Token curr;
+        String attrName = "";
+        //strings to be added to arraylist
+        int toBeAdded = 0;
+        while(!(curr=tokenizer.nextToken()).getContent().equalsIgnoreCase(endOfList)){
+            if(curr.isEmpty){
+                throw new ParseCommandException("invalid query: missing "+ endOfList);
+            }
+            else if (curr.getContent().equals(",")) {
+                isValidInsertion(toBeAdded);
+                attrList.add(attrName);
+                toBeAdded--;
+                continue;
+            }
+            attrName = getAName(curr);
+            toBeAdded++;
+        }
+        isValidInsertion(toBeAdded);
+        attrList.add(attrName);
+        return attrList;
+    }
+
+    ArrayList<Value> getValueList(String endOfList) throws ParseCommandException
+    {
+        ArrayList<Value> list = new ArrayList<>();
+        Token curr;
+        Value value = new Value();
+        int toBeAdded = 0;
+        while(!(curr=tokenizer.nextToken()).getContent().equalsIgnoreCase(endOfList)){
+            if(curr.isEmpty){
+                throw new ParseCommandException("invalid query: missing" + endOfList);
+            }
+            else if (curr.getContent().equals(",")) {
+                isValidInsertion(toBeAdded);
+                list.add(value);
+                toBeAdded--;
+                continue;
+            }
+            value = setUpValue(curr);
+            toBeAdded++;
+
+        }
+        isValidInsertion(toBeAdded);
+        list.add(value);
+        return list;
+    }
+
+    ArrayList<NameValuePair> getNameValueList(String endOfList) throws ParseCommandException
+    {
+        ArrayList<NameValuePair> list = new ArrayList<>();
+        Token curr;
+        NameValuePair pair = new NameValuePair();
+        int toBeAdded = 0;
+        while(!(curr=tokenizer.nextToken()).getContent().equalsIgnoreCase(endOfList)){
+            if(curr.isEmpty){
+                throw new ParseCommandException("invalid query: missing "+ endOfList);
+            }
+            if (curr.getContent().equals(",")) {
+                isValidInsertion(toBeAdded);
+                list.add(pair);
+                toBeAdded--;
+                continue;
+            }
+            pair=setUpNameValuePair(curr);
+            toBeAdded++;
+        }
+        isValidInsertion(toBeAdded);
+        list.add(pair);
+        return list;
+    }
+
+    NameValuePair setUpNameValuePair(Token curr) throws ParseCommandException
+    {
+        NameValuePair pair = new NameValuePair();
+        pair.setColumnName(getAName(curr));
+        if(!(curr = tokenizer.nextToken()).getContent().equals("=")) {
+            throw new ParseCommandException("invalid query: expected = but found "+ curr.getContent());
+        }
+        pair.setValue(setUpValue(tokenizer.nextToken()));
+        return pair;
+    }
+
+    Value setUpValue(Token curr) throws ParseCommandException
+    {
+        System.out.println(curr.getContent());
+        Value value = new Value();
+        if (curr.isStringLiteral) {
+            value.setContent(curr.getContent());
+            value.setValueType(Value.ValueType.StringLiteral);
+            return value;
+        }
+        else if(isIntegerLiteral(curr.getContent())){
+            value.setContent(curr.getContent());
+            value.setValueType(Value.ValueType.IntegerLiteral);
+            return value;
+        }
+        else if(isFloatLiteral(curr.getContent())){
+            value.setContent(curr.getContent());
+            value.setValueType(Value.ValueType.FloatLiteral);
+            return value;
+        }
+        else if(isBooleanLiteral(curr.getContent())){
+            value.setContent(curr.getContent());
+            value.setValueType(Value.ValueType.BooleanLiteral);
+            return value;
+        }
+        throw new ParseCommandException("invalid query: expected a value e.g. '<StringLiteral>' ," +
+                " <BooleanLiteral> , <FloatLiteral> , <IntegerLiteral>");
+    }
+
+    void isValidInsertion(int toBeAdded) throws ParseCommandException
+    {
+        if(toBeAdded == 1) return;
+        if(toBeAdded == 0){
+            throw new ParseCommandException("missing element between comma");
+        }
+        throw new ParseCommandException("Missing comma");
+    }
+
+    boolean isBooleanLiteral(String target){
+        return target.equals("true") || target.equals("false");
+    }
+
+    boolean isFloatLiteral(String target){
+        try{
+            Float.parseFloat(target);
+            return true;
+        }catch(NumberFormatException nfe){
+            return false;
+        }
+    }
+
+    boolean isIntegerLiteral (String target){
+        try{
+            Integer.parseInt(target);
+            return true;
+        }catch(NumberFormatException nfe){
+            return false;
+        }
+    }
+
+
+    public static void main(String[] args){
+        Parser parser = new Parser("DELETE FROM TableName WHERE ((aa==1)OR(l2l!=true))AND(lll LIKE 'aa');");
+        try{
+            Delete delete = (Delete) parser.getCommand();
+            System.out.println(delete.getCondition().getInfix());
+        }catch(ParseCommandException e){
+            System.out.println(e);
+            System.exit(1);
+        }
+
+    }
+
+}
+//修改error message
+//getkeyword-》checkkeyword
