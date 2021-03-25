@@ -35,7 +35,7 @@ public class Update extends CommandType{
         for(int id : targetRowIds){
             Row row = table.getRowById(id);
             for(NameValuePair pair:nameValuePairs){
-                row.setValue(pair.getColumnName(), pair.getValue());
+                table.setRowValueByCol(row, pair.getColumnName(), pair.getValue());
             }
         }
     }

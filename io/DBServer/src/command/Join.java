@@ -55,7 +55,7 @@ public class Join extends CommandType{
             SingleExpr expression = new SingleExpr();
             expression.setOperator(SingleExpr.OperatorType.EQUAL);
             expression.setColumnName(columnName2);
-            expression.setValue(row.getValue(columnName1));
+            expression.setValue(row.getValue(table1.getColumnIndex(columnName1)));
             ArrayList<Integer> matchRows = expression.getRowIds(table2);
             for(int id:matchRows){
                 s.append(lines++).append('\t');

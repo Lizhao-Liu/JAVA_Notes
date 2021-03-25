@@ -457,4 +457,20 @@ public class Parser {
         }
     }
 
+    public static void main(String[] args){
+        DatabaseManager manager = new DatabaseManager();
+        String[] incomingCommands = {"CREATE DATABASE markbook;", "USE markbook;", "CREATE TABLE marks (name, mark, pass);"};
+        for(int i =0; i < incomingCommands.length; i++){
+            Parser parser = new Parser(incomingCommands[i]);
+            try {
+                CommandType cmd = parser.start();
+                cmd.execute(manager);
+                System.out.println("OK");
+            } catch (DBException e) {
+                System.out.println(e);
+                System.exit(1);
+            }
+        }
+
+    }
 }

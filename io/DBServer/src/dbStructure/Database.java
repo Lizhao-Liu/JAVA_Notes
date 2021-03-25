@@ -6,7 +6,7 @@ import java.io.File;
 import java.util.*;
 
 public class Database {
-    private static final String extension = ".db";
+    private static final String tableExtension = ".tb";
     private static final String rootDir = "./database/";
     private static DatabaseManager manager;
     private String dbName;
@@ -31,10 +31,6 @@ public class Database {
         this.manager = manager;
     }
 
-    public String getDbPath(){
-        return dbPath;
-    }
-
     public boolean containsTable(String tableName){
         if(!tableMap.containsKey(tableName)) return false;
         return true;
@@ -45,6 +41,7 @@ public class Database {
         if(containsTable(name)) throw new CommandExecutionException("table " + name + " already exists");
         Table tb = new Table(name);
         tb.setDatabase(this);
+        tb.setPath(dbPath + name + tableExtension);
         tb.create();
         tableMap.put(name, tables.size());
         tables.add(tb);
