@@ -1,6 +1,6 @@
 package parse;
 
-import java.util.ArrayList;
+import exception.InvalidTokenException;
 
 public class Tokenizer {
     private int pos;
@@ -13,14 +13,14 @@ public class Tokenizer {
         length = line.length();
     }
 
-
-    public Token peek(){
+    //peek the next token but not change the value of pos(position in line)
+    public Token peek() throws InvalidTokenException {
         int origPos = pos;
         Token next = nextToken();
         pos = origPos;
         return next;
     }
-    public Token peek(int n){
+    public Token peek(int n) throws InvalidTokenException {
         int origPos = pos;
         Token next = new Token();
         while(n>0){
@@ -31,44 +31,44 @@ public class Tokenizer {
         return next;
     }
 
-
-
-    public Token nextToken()  {
+    public Token nextToken() throws InvalidTokenException {
         Token token = new Token();
+        //skip the blanks
         while (pos<length && isBlank(currLine[pos])) {
             pos++;
         }
+        //set up an empty token
         if(pos>=length){
             token.setIsEmpty();
             return token;
         }
-
+        //find the next token type and get the returned token
         char curr = currLine[pos];
         if (isSymbol(curr)) {
-            token.setContent(Character.toString(curr));
-            token.setIsSymbol();
-            if(curr==';'){
-                token.setIsEndSymbol();
-            }
-            pos++;
-            return token;
+            return nextSymbol(curr);
         }
         if (isSingleQuote(curr)) {
-            try {
-                return nextQuoteLine();
-            } catch (InvalidTokenException e) {
-                System.out.println(e);
-                System.exit(1);
-            }
+            return nextQuoteLine();
         }
         if(isDigital(curr)){
+            //check if the next token is a float with a decimal point in it
             if((token = nextFloat())!=null) return token;
         }
         if (isLetter(curr) || isDigital(curr)) {
             return nextString();
         }
-        System.out.println("invalid token");
-        System.exit(1);
+        throw new InvalidTokenException("invalid token" + curr);
+    }
+
+    public Token nextSymbol(char curr)
+    {
+        Token token = new Token();
+        token.setContent(Character.toString(curr));
+        token.setIsSymbol();
+        if(curr==';'){
+            token.setIsEndSymbol();
+        }
+        pos++;
         return token;
     }
 
@@ -121,43 +121,22 @@ public class Tokenizer {
 
     private boolean isSymbol(char c){
         return (c == '>' || c == '<' || c == '=' || c == '*' ||
-                c == ',' || c == '(' || c == ')'||c==';'|| c=='!'|| c=='|'|| c=='.');
+                c == ',' || c == '(' || c == ')'||c==';'|| c=='!');
     }
+
     private boolean isLetter(char c){
         return (c>='a'&&c<='z')||(c>='A'&&c<='Z');
     }
+
     private boolean isDigital(char c){
         return((c>='0'&&c<='9'));
     }
+
     private boolean isBlank(char c){
         return (c==' '||c=='\n'||c=='\t');
     }
+
     private boolean isSingleQuote(char c){
         return c=='\'';
     }
-
-    public static void main(String[] args){
-        Tokenizer tokenizer = new Tokenizer("1.22");
-        Token token = tokenizer.nextToken();
-        System.out.println(token.getContent());
-        System.out.println(token.isAlphanumeric);
-//        Tokenizer tokenizer = new Tokenizer("sELECT ***= FROM 'ABC  22' 'WHERE' (anc =1) AND ((cba >!= 2);");
-//        Token token = tokenizer.nextToken();
-//        while(!token.isEndSymbol){
-//            System.out.println(token.getContent());
-//            System.out.println(tokenizer.pos);
-//            System.out.println(tokenizer.peek());
-//            System.out.println(tokenizer.pos);
-//            System.out.println(token.isSymbol);
-//            System.out.println(token.isAlphanumeric);
-//            System.out.println(token.isStringLiteral);
-//            token = tokenizer.nextToken();
-//        }
-//        System.out.println(token.getContent());
-//        token=tokenizer.nextToken();
-//        System.out.println(token.isEmpty);
-//        System.out.println(token.getContent());
-
-    }
-
 }

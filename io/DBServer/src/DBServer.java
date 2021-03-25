@@ -1,13 +1,19 @@
+import command.CommandType;
+import dbStructure.DatabaseManager;
+import exception.DBException;
+import parse.Parser;
+
 import java.io.*;
 import java.net.*;
-import java.util.*;
 
 class DBServer
 {
+    DatabaseManager manager;
     public DBServer(int portNumber)
     {
         try {
             ServerSocket serverSocket = new ServerSocket(portNumber);
+            manager= new DatabaseManager();
             System.out.println("Server Listening");
             while(true) processNextConnection(serverSocket);
         } catch(IOException ioe) {
@@ -30,18 +36,30 @@ class DBServer
         }
     }
 
-    private void processNextCommand(BufferedReader socketReader, BufferedWriter socketWriter) throws IOException, NullPointerException
-    {
+    private void processNextCommand(BufferedReader socketReader, BufferedWriter socketWriter) throws IOException, NullPointerException {
         String incomingCommand = socketReader.readLine();
-        System.out.println("Received message: " + incomingCommand);
-        socketWriter.write("[OK] Thanks for your message: " + incomingCommand);
-        socketWriter.write("\n" + ((char)4) + "\n");
-        socketWriter.flush();
-    }
+        Parser parser = new Parser(incomingCommand);
+        try {
+            CommandType cmd = parser.start();
+            cmd.execute(manager);
+            socketWriter.write("[OK]");
+            socketWriter.write("\n" + ((char) 4) + "\n");
+            socketWriter.flush();
+            socketWriter.write(cmd.getOutput());
+            socketWriter.write("\n" + ((char) 4) + "\n");
+            socketWriter.flush();
+        } catch (DBException e) {
+            socketWriter.write(e.toString());
+            socketWriter.write("\n" + ((char) 4) + "\n");
+            socketWriter.flush();
+        }
 
+
+    }
     public static void main(String args[])
     {
         DBServer server = new DBServer(8888);
     }
+
 
 }

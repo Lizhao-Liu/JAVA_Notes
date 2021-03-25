@@ -59,3 +59,48 @@ StringLiterals may optionally include a range of punctuation EXCEPT single quote
 FloatLiterals are in standard notation (i.e. not scientific, not hexidecimal)
 The range of numbers (max and min) match those supported by the standard Java int and float types
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"CREATE DATABASE test;", "USE test;",
+"CREATE TABLE test (name, age, award);",
+"ALTER TABLE test DROP award;", 
+"INSERT INTO test VALUES ('lizhao',24);",
+"INSERT INTO test VALUES ('batu', 25);", 
+"INSERT INTO test VALUES ('luobetou', 9);",
+"INSERT INTO test VALUES ('roubaozi', 13);",
+ "SELECT * FROM test WHERE (age>=20)AND(name=='roubaozi');" ,
+ "DROP DATABASE test;"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

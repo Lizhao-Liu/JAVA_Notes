@@ -1,10 +1,12 @@
 package parse;
-import exception.ParseCommandException;
-import parse.command.*;
-import parse.command.Where.Condition;
-import parse.command.Where.SingleExpr;
-import parse.command.common.NameValuePair;
-import parse.command.common.Value;
+import dbStructure.DatabaseManager;
+import exception.DBException;
+import exception.InvalidQueryException;
+import command.*;
+import command.Where.Condition;
+import command.Where.SingleExpr;
+import command.common.NameValuePair;
+import command.common.Value;
 
 import java.util.ArrayList;
 import java.util.Stack;
@@ -13,17 +15,17 @@ public class Parser {
     private Tokenizer tokenizer;
 
     public Parser(String incomingStatement){ this.tokenizer = new Tokenizer(incomingStatement); }
-    public CommandType getCommand() throws ParseCommandException{
+    public CommandType start() throws InvalidQueryException 
+    {
         try{
             return parseCommand();
         }catch (NullPointerException e){
-            throw new ParseCommandException("query terminates unexpectedly");
+            throw new InvalidQueryException("query terminates unexpectedly");
         }
     }
-   public CommandType parseCommand() throws ParseCommandException
-    {
+   public CommandType parseCommand() throws InvalidQueryException  {
         Token token = tokenizer.nextToken();
-        if(token.isEmpty){throw new ParseCommandException("invalid query: empty string");}
+        if(token.isEmpty){throw new InvalidQueryException("invalid query: empty string");}
         switch(token.getContent().toUpperCase()){
             case "USE":
                 return parseUse();
@@ -44,12 +46,11 @@ public class Parser {
             case "JOIN":
                 return parseJoin();
             default:
-                throw new ParseCommandException("invalid Command");
+                throw new InvalidQueryException("invalid Command");
         }
     }
     //BNF: USE <DatabaseName>
-    CommandType parseUse() throws ParseCommandException
-    {
+    CommandType parseUse() throws InvalidQueryException {
         Use use = new Use();
         use.setDbName(getAName(tokenizer.nextToken()));
         getTerminator(tokenizer.nextToken());
@@ -57,8 +58,7 @@ public class Parser {
     }
 
     //BNF: <CreateDatabase> | <CreateTable>
-    CommandType parseCreate() throws ParseCommandException
-    {
+    CommandType parseCreate() throws InvalidQueryException  {
         Token token = tokenizer.nextToken();
         if (token.getContent().equalsIgnoreCase("DATABASE")) {
             return parseCreateDatabase();
@@ -67,13 +67,12 @@ public class Parser {
             return parseCreateTable();
         }
         else {
-            throw new ParseCommandException("invalid query");
+            throw new InvalidQueryException("invalid query");
         }
     }
 
     //BNF:CREATE DATABASE <DatabaseName>
-    CommandType parseCreateDatabase() throws ParseCommandException
-    {
+    CommandType parseCreateDatabase() throws InvalidQueryException  {
         CreateDatabase createDB = new CreateDatabase();
         createDB.setDbName(getAName(tokenizer.nextToken()));
         getTerminator(tokenizer.nextToken());
@@ -82,8 +81,7 @@ public class Parser {
 
     //BNF:CREATE TABLE <TableName> |
     //    CREATE TABLE <TableName> ( <AttributeList> )
-    CommandType parseCreateTable() throws ParseCommandException
-    {
+    CommandType parseCreateTable() throws InvalidQueryException  {
         CreateTable createTable = new CreateTable();
         createTable.setTableName(getAName(tokenizer.nextToken()));
         if(tokenizer.peek().getContent().equals("(")){
@@ -95,8 +93,7 @@ public class Parser {
     }
 
     //BNF: DROP <Structure> <StructureName>
-    CommandType parseDrop() throws ParseCommandException
-    {
+    CommandType parseDrop() throws InvalidQueryException  {
         Drop drop = new Drop();
         Token token = tokenizer.nextToken();
         if(token.getContent().equalsIgnoreCase("DATABASE")){
@@ -106,7 +103,7 @@ public class Parser {
             drop.setType(Drop.StructureType.table);
         }
         else{
-            throw new ParseCommandException("invalid structure type");
+            throw new InvalidQueryException("invalid structure type");
         }
         drop.setName(getAName(tokenizer.nextToken()));
         getTerminator(tokenizer.nextToken());
@@ -114,8 +111,7 @@ public class Parser {
     }
 
     //BNF: ALTER TABLE <TableName> <AlterationType> <AttributeName>
-    CommandType parseAlter() throws ParseCommandException
-    {
+    CommandType parseAlter() throws InvalidQueryException  {
         Alter alter = new Alter();
         getKeyword("TABLE");
         alter.setTableName(getAName(tokenizer.nextToken()));
@@ -129,7 +125,7 @@ public class Parser {
             alter.setType(Alter.AlterationType.DROP);
         }
         else{
-            throw new ParseCommandException("invalid query: missing alteration type");
+            throw new InvalidQueryException("invalid query: missing alteration type");
         }
 
         alter.setColumnName(getAName(tokenizer.nextToken()));
@@ -138,8 +134,7 @@ public class Parser {
     }
 
     //BNF: INSERT INTO <TableName> VALUES ( <ValueList> )
-    CommandType parseInsert() throws ParseCommandException
-    {
+    CommandType parseInsert() throws InvalidQueryException  {
         Insert insert = new Insert();
         getKeyword("INTO");
         insert.setTableName(getAName(tokenizer.nextToken()));
@@ -152,8 +147,7 @@ public class Parser {
 
     //SELECT <WildAttribList> FROM <TableName> |
     //SELECT <WildAttribList> FROM <TableName> WHERE <Condition>
-    CommandType parseSelect() throws ParseCommandException
-    {
+    CommandType parseSelect() throws InvalidQueryException  {
         Select select = new Select();
         //parse WildAttribList
         if(tokenizer.peek().getContent().equals("*")){
@@ -172,13 +166,12 @@ public class Parser {
             select.setCondition(getCondition());
             getTerminator(tokenizer.nextToken());
         }
-        else {throw new ParseCommandException("invalid query: "+ token.getContent()+  " unexpected, add ; to terminate or use WHERE for conditions");}
+        else {throw new InvalidQueryException("invalid query: "+ token.getContent()+  " unexpected, add ; to terminate or use WHERE for conditions");}
         return select;
     }
 
     //DELETE FROM <TableName> WHERE <Condition>
-    CommandType parseDelete() throws ParseCommandException
-    {
+    CommandType parseDelete() throws InvalidQueryException  {
         Delete delete = new Delete();
         getKeyword("FROM");
         delete.setTableName(getAName(tokenizer.nextToken()));
@@ -189,8 +182,7 @@ public class Parser {
     }
 
     //UPDATE <TableName> SET <NameValueList> WHERE <Condition>
-    CommandType parseUpdate() throws ParseCommandException
-    {
+    CommandType parseUpdate() throws InvalidQueryException  {
         Update update = new Update();
         update.setTableName(getAName(tokenizer.nextToken()));
         getKeyword("SET");
@@ -201,8 +193,7 @@ public class Parser {
     }
 
     //BNF: JOIN <TableName> AND <TableName> ON <AttributeName> AND <AttributeName>
-    CommandType parseJoin() throws ParseCommandException
-    {
+    CommandType parseJoin() throws InvalidQueryException  {
         Join join = new Join();
         join.setTableName1(getAName(tokenizer.nextToken()));
         getKeyword("AND");
@@ -218,39 +209,36 @@ public class Parser {
 
 
     //          ****************************AUXILIARY FUNCTIONS****************************
-    void getKeyword(String keyword) throws ParseCommandException
-    {
+    void getKeyword(String keyword) throws InvalidQueryException  {
         if(!tokenizer.nextToken().getContent().equalsIgnoreCase(keyword)) {
-            throw new ParseCommandException("invalid query: missing keyword: "+keyword);
+            throw new InvalidQueryException("invalid query: missing keyword: "+keyword);
         }
     }
-    String getAName(Token token) throws ParseCommandException
+    String getAName(Token token) throws InvalidQueryException
     {
         if(!token.isAlphanumeric){
-            throw new ParseCommandException("invalid column/table/database name");
+            throw new InvalidQueryException("invalid column/table/database name");
         }
         return token.getContent();
     }
-    void getTerminator(Token token) throws ParseCommandException
+    void getTerminator(Token token) throws InvalidQueryException
     {
         if(token.isEndSymbol){
-            System.out.println("[OK]");
+            return;
         }
         else{
-            throw new ParseCommandException("terminator missing");
+            throw new InvalidQueryException("terminator missing");
         }
     }
     // BNF: ( <Condition> ) AND ( <Condition> )  |
     //      ( <Condition> ) OR ( <Condition> )   |
     //      <AttributeName> <Operator> <Value>
-    Condition getCondition() throws ParseCommandException
-    {
+    Condition getCondition() throws InvalidQueryException  {
         ArrayList<Object> conditionList = getConditionList();
         return new Condition(conditionList);
     }
 
-    ArrayList<Object> getConditionList() throws ParseCommandException
-    {
+    ArrayList<Object> getConditionList() throws InvalidQueryException  {
         Stack stack = new Stack();
         ArrayList<Object> recordList = new ArrayList<>();
         Token curr;
@@ -258,7 +246,7 @@ public class Parser {
         while(!(curr=tokenizer.peek()).isEndSymbol){
             tokenizer.nextToken();
             if(curr.isEmpty){
-                throw new ParseCommandException("invalid query: expected ;");
+                throw new InvalidQueryException("invalid query: expected ;");
             }
             if(curr.getContent().equals("(")){
                 stack.push("(");
@@ -267,7 +255,7 @@ public class Parser {
                 continue;
             }
             if(curr.getContent().equals(")")){
-                if(stack.isEmpty()){throw new ParseCommandException("invalid query: brackets not match");}
+                if(stack.isEmpty()){throw new InvalidQueryException("invalid query: brackets not match");}
                 recordList.add(")");
                 pos++;
                 stack.pop();
@@ -275,7 +263,7 @@ public class Parser {
             }
             if(curr.getContent().equalsIgnoreCase("AND")||curr.getContent().equalsIgnoreCase("OR")){
                 if(stack.isEmpty()){
-                    if(separator!=0) throw new ParseCommandException("missing brackets");
+                    if(separator!=0) throw new InvalidQueryException("missing brackets");
                     separator = pos;
                 }
                 recordList.add(curr.getContent());
@@ -285,13 +273,13 @@ public class Parser {
                 recordList.add(getSingleExpr(curr));
                 pos++;
             }
-            else throw new ParseCommandException("invalid query, unexpected "+ curr.getContent());
+            else throw new InvalidQueryException("invalid query, unexpected "+ curr.getContent());
         }
-        if(!stack.isEmpty()) throw new ParseCommandException("invalid query: brackets not match");
+        if(!stack.isEmpty()) throw new InvalidQueryException("invalid query: brackets not match");
         return recordList;
     }
 
-    SingleExpr getSingleExpr(Token token) throws ParseCommandException {
+    SingleExpr getSingleExpr(Token token) throws InvalidQueryException  {
         SingleExpr singleExpr = new SingleExpr();
         singleExpr.setColumnName(getAName(token));
         singleExpr.setOperator(getOperator(tokenizer.nextToken()));
@@ -299,25 +287,30 @@ public class Parser {
         return singleExpr;
     }
 
-    SingleExpr.OperatorType getOperator(Token token) throws ParseCommandException
-    {
+    SingleExpr.OperatorType getOperator(Token token) throws InvalidQueryException  {
         if(token.getContent().equals("LIKE")){
             String next = tokenizer.peek().getContent();
             if(isIntegerLiteral(next)||isFloatLiteral(next)){
-                throw new ParseCommandException("Invalid query: String expected after LIKE");
+                throw new InvalidQueryException("Invalid query: String expected after LIKE");
             }
             return SingleExpr.OperatorType.LIKE;
         }
-        if(!token.isSymbol) throw new ParseCommandException("invalid query: no operator found");
+        if(!token.isSymbol) throw new InvalidQueryException("invalid query: no operator found");
         String operator = token.getContent();
         while((token = tokenizer.peek()).isSymbol && !token.isEndSymbol){
             operator += token.getContent();
             tokenizer.nextToken();
         }
-        return getSymbolOperator(operator);
+        SingleExpr.OperatorType type = getSymbolOperator(operator);
+        if(isBooleanLiteral(token.getContent()) || token.isStringLiteral){
+            if(type!= SingleExpr.OperatorType.EQUAL && type!= SingleExpr.OperatorType.NOTEQUAL){
+                throw new InvalidQueryException("expected numerical value after <, >, <=, >= but found "+ token.getContent());
+            }
+        }
+        return type;
     }
 
-    SingleExpr.OperatorType getSymbolOperator(String s) throws ParseCommandException
+    SingleExpr.OperatorType getSymbolOperator(String s) throws InvalidQueryException
     {
         if(s.equals("==")){return SingleExpr.OperatorType.EQUAL;}
         if(s.equals(">")) {return SingleExpr.OperatorType.GREATER;}
@@ -325,11 +318,10 @@ public class Parser {
         if(s.equals(">=")){return SingleExpr.OperatorType.EQUALORGREATER;}
         if(s.equals("<=")){return SingleExpr.OperatorType.EQUALORLESS;}
         if(s.equals("!=")){return SingleExpr.OperatorType.NOTEQUAL;}
-        throw new ParseCommandException("invalid query: expected an operator but found "+ s);
+        throw new InvalidQueryException("invalid query: expected an operator but found "+ s);
     }
 
-    ArrayList<String> getAttrList(String endOfList) throws ParseCommandException
-    {
+    ArrayList<String> getAttrList(String endOfList) throws InvalidQueryException  {
         ArrayList<String> attrList = new ArrayList<>();
         //curr starts at the first string of the attribute list
         Token curr;
@@ -337,8 +329,8 @@ public class Parser {
         //strings to be added to arraylist
         int toBeAdded = 0;
         while(!(curr=tokenizer.nextToken()).getContent().equalsIgnoreCase(endOfList)){
-            if(curr.isEmpty){
-                throw new ParseCommandException("invalid query: missing "+ endOfList);
+            if(curr.isEmpty|| curr.isEndSymbol){
+                throw new InvalidQueryException("invalid query: missing "+ endOfList);
             }
             else if (curr.getContent().equals(",")) {
                 isValidInsertion(toBeAdded);
@@ -354,15 +346,14 @@ public class Parser {
         return attrList;
     }
 
-    ArrayList<Value> getValueList(String endOfList) throws ParseCommandException
-    {
+    ArrayList<Value> getValueList(String endOfList) throws InvalidQueryException  {
         ArrayList<Value> list = new ArrayList<>();
         Token curr;
         Value value = new Value();
         int toBeAdded = 0;
         while(!(curr=tokenizer.nextToken()).getContent().equalsIgnoreCase(endOfList)){
-            if(curr.isEmpty){
-                throw new ParseCommandException("invalid query: missing" + endOfList);
+            if(curr.isEmpty|| curr.isEndSymbol){
+                throw new InvalidQueryException("invalid query: missing" + endOfList);
             }
             else if (curr.getContent().equals(",")) {
                 isValidInsertion(toBeAdded);
@@ -372,22 +363,20 @@ public class Parser {
             }
             value = setUpValue(curr);
             toBeAdded++;
-
         }
         isValidInsertion(toBeAdded);
         list.add(value);
         return list;
     }
 
-    ArrayList<NameValuePair> getNameValueList(String endOfList) throws ParseCommandException
-    {
+    ArrayList<NameValuePair> getNameValueList(String endOfList) throws InvalidQueryException  {
         ArrayList<NameValuePair> list = new ArrayList<>();
         Token curr;
         NameValuePair pair = new NameValuePair();
         int toBeAdded = 0;
         while(!(curr=tokenizer.nextToken()).getContent().equalsIgnoreCase(endOfList)){
-            if(curr.isEmpty){
-                throw new ParseCommandException("invalid query: missing "+ endOfList);
+            if(curr.isEmpty|| curr.isEndSymbol){
+                throw new InvalidQueryException("invalid query: missing "+ endOfList);
             }
             if (curr.getContent().equals(",")) {
                 isValidInsertion(toBeAdded);
@@ -403,52 +392,47 @@ public class Parser {
         return list;
     }
 
-    NameValuePair setUpNameValuePair(Token curr) throws ParseCommandException
-    {
+    NameValuePair setUpNameValuePair(Token curr) throws InvalidQueryException  {
         NameValuePair pair = new NameValuePair();
         pair.setColumnName(getAName(curr));
         if(!(curr = tokenizer.nextToken()).getContent().equals("=")) {
-            throw new ParseCommandException("invalid query: expected = but found "+ curr.getContent());
+            throw new InvalidQueryException("invalid query: expected = but found "+ curr.getContent());
         }
         pair.setValue(setUpValue(tokenizer.nextToken()));
         return pair;
     }
 
-    Value setUpValue(Token curr) throws ParseCommandException
+    Value setUpValue(Token curr) throws InvalidQueryException
     {
-        System.out.println(curr.getContent());
         Value value = new Value();
+        value.setContent(curr.getContent());
         if (curr.isStringLiteral) {
-            value.setContent(curr.getContent());
             value.setValueType(Value.ValueType.StringLiteral);
             return value;
         }
         else if(isIntegerLiteral(curr.getContent())){
-            value.setContent(curr.getContent());
             value.setValueType(Value.ValueType.IntegerLiteral);
             return value;
         }
         else if(isFloatLiteral(curr.getContent())){
-            value.setContent(curr.getContent());
             value.setValueType(Value.ValueType.FloatLiteral);
             return value;
         }
         else if(isBooleanLiteral(curr.getContent())){
-            value.setContent(curr.getContent());
             value.setValueType(Value.ValueType.BooleanLiteral);
             return value;
         }
-        throw new ParseCommandException("invalid query: expected a value e.g. '<StringLiteral>' ," +
+        throw new InvalidQueryException("invalid query: expected a value e.g. '<StringLiteral>' ," +
                 " <BooleanLiteral> , <FloatLiteral> , <IntegerLiteral>");
     }
 
-    void isValidInsertion(int toBeAdded) throws ParseCommandException
+    void isValidInsertion(int toBeAdded) throws InvalidQueryException
     {
         if(toBeAdded == 1) return;
         if(toBeAdded == 0){
-            throw new ParseCommandException("missing element between comma");
+            throw new InvalidQueryException("missing element between comma");
         }
-        throw new ParseCommandException("Missing comma");
+        throw new InvalidQueryException("Missing comma");
     }
 
     boolean isBooleanLiteral(String target){
@@ -473,19 +457,4 @@ public class Parser {
         }
     }
 
-
-    public static void main(String[] args){
-        Parser parser = new Parser("DELETE FROM TableName WHERE ((aa==1)OR(l2l!=true))AND(lll LIKE 'aa');");
-        try{
-            Delete delete = (Delete) parser.getCommand();
-            System.out.println(delete.getCondition().getInfix());
-        }catch(ParseCommandException e){
-            System.out.println(e);
-            System.exit(1);
-        }
-
-    }
-
 }
-//修改error message
-//getkeyword-》checkkeyword
