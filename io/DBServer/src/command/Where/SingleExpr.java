@@ -12,14 +12,6 @@ public class SingleExpr {
     Value value;
     OperatorType operatorType;
 
-    public String getColumnName() {
-        return columnName;
-    }
-
-    public OperatorType getOperator() {
-        return operatorType;
-    }
-
     public Value getValue() {
         return value;
     }
@@ -39,28 +31,18 @@ public class SingleExpr {
     public enum OperatorType{
         EQUAL, GREATER, LESS, EQUALORGREATER, EQUALORLESS, NOTEQUAL, LIKE
     }
-    public String toString(){
-        return  columnName +" " + operatorInString() + " " + value.getContent() + " (" + value.getValueType() + ")";
-    }
-    public String operatorInString(){
-        String op = "";
-        if (operatorType==OperatorType.EQUAL) op="==";
-        if (operatorType==OperatorType.EQUALORGREATER) op=">=";
-        if (operatorType==OperatorType.LESS) op= "<";
-        if (operatorType==OperatorType.GREATER) op=">";
-        if (operatorType==OperatorType.EQUALORLESS) op="<=";
-        if (operatorType==OperatorType.LIKE) op="LIKE";
-        if (operatorType==OperatorType.NOTEQUAL) op="!=";
-        return op;
-    }
 
+    //get the rows which match the single expression
     public ArrayList<Integer> getRowIds(Table table) throws CommandExecutionException {
         int column = table.getColumnIndex(columnName);
+        //check if the value type match the attribute type in a single expression
         if(table.getColumn(columnName).getType()!=value.getValueType()){
             throw new CommandExecutionException("attribute "+columnName +" cannot be converted to "+ value.getValueType());
         }
+        //a record of the target row ids
         ArrayList<Integer> keys= new ArrayList<>();
         ArrayList<Row> rows = table.getRows();
+        //walking through all the rows in the table and record the row ids which match the expression
         for(int i = 0; i<rows.size(); i++){
             if(isTarget(rows.get(i).getValue(column))){
                 keys.add(rows.get(i).getId());
@@ -68,6 +50,7 @@ public class SingleExpr {
         }
         return keys;
     }
+    //check if there is a match
     boolean isTarget(Value element) {
         if (operatorType==OperatorType.EQUAL) return isEqual(element.getContent(),value.getContent());
         if (operatorType==OperatorType.EQUALORGREATER) return isGreaterOrEqual(element.getFloat(), value.getFloat());
@@ -105,22 +88,5 @@ public class SingleExpr {
     boolean isNotEqual(String element, String comparator){
         if(element.equals(comparator)) return false;
         return true;
-    }
-    public static void main(String[] args){
-        SingleExpr e = new SingleExpr();
-        System.out.println(e.isLike("a", "bc"));
-        System.out.println(e.isLike("l23", "l23"));
-        System.out.println(e.isGreater((float)1.200, (float)1.2));
-        System.out.println(e.isLess((float)3,(float)4));
-        System.out.println(e.isGreater((float)4,(float)3));
-        System.out.println(e.isNotEqual("33", "34"));
-        System.out.println(e.isLike("Tr", "tr"));
-        System.out.println(e.isLike("llllll", "lll"));
-        System.out.println(e.isEqual("true", "true"));
-        System.out.println(e.isNotEqual("false", "true"));
-        System.out.println(e.isGreaterOrEqual((float)2, (float)2));
-        System.out.println(e.isLessOrEqual((float)2,(float)3));
-
-
     }
 }

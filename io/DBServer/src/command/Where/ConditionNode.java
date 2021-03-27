@@ -1,6 +1,5 @@
 package command.Where;
 
-
 import dbStructure.Table;
 import exception.CommandExecutionException;
 
@@ -14,8 +13,7 @@ public class ConditionNode {
     private ConditionNode left;
     private ConditionNode right;
 
-    public ConditionNode(){expression = null; left = null; right = null; type = ConditionNodeType.UNDEFINED;}
-
+    //initialize an operator node
     public ConditionNode(String nodeTypeText){
         if(nodeTypeText.equals("OR")){
             this.type=ConditionNodeType.OR;
@@ -26,6 +24,8 @@ public class ConditionNode {
         }
         expression = null; left = null; right = null;
     }
+
+    //initialize a singleExpr node which is also the leaf node in this case
     public ConditionNode(SingleExpr expr){
         this.expression = expr;
         this.type = ConditionNodeType.EXPRESSION;
@@ -35,32 +35,25 @@ public class ConditionNode {
     public void setType(ConditionNodeType type){
         this.type = type;
     }
-
     public ConditionNodeType getType(){
         return type;
     }
     public void setLeft(ConditionNode leftNode) {
         this.left = leftNode;
     }
-
     public void setRight(ConditionNode rightNode) {
         this.right = rightNode;
     }
 
-    public ConditionNode getLeft() {
-        return left;
-    }
-
-    public ConditionNode getRight() {
-        return right;
-    }
 
     public ArrayList<Integer> getRowList(Table table) throws CommandExecutionException {
+        //if the operator is AND, find the common rows from the two returned lists (one from left and one from right)
         if(this.type==ConditionNodeType.AND){
             ArrayList<Integer> res = new ArrayList<Integer>(left.getRowList(table));
             res.retainAll(right.getRowList(table));
             return res;
         }
+        //if the operator is OR, return back all the rows appearing in the two returned lists
         if(this.type==ConditionNodeType.OR){
             Set<Integer> set = new HashSet<>(left.getRowList(table));
             set.addAll(right.getRowList(table));
@@ -71,19 +64,6 @@ public class ConditionNode {
             return expression.getRowIds(table);
         }
     }
-
-    public String toString(){
-        if(this.type==ConditionNodeType.EXPRESSION){
-            return String.valueOf(expression)+" ";
-        }else if(this.type==ConditionNodeType.AND){
-            return "AND ";
-        }else if(this.type==ConditionNodeType.OR){
-            return "OR ";
-        }else{
-            return "? ";
-        }
-    }
-
     public enum ConditionNodeType{OR, AND, EXPRESSION, UNDEFINED}
 }
 

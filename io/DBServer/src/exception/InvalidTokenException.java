@@ -1,7 +1,7 @@
 package exception;
 
+//exceptions happening during the tokenizing process such as "invalid token"
 public class InvalidTokenException extends InvalidQueryException{
-    String errorMessage;
     public InvalidTokenException(String errorMessage){
         super(errorMessage);
     }

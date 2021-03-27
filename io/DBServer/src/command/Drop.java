@@ -15,6 +15,7 @@ public class Drop extends CommandType{
         this.name = name;
     }
     public enum StructureType{table, database}
+    @Override
     public void execute(DatabaseManager manager) throws CommandExecutionException {
         if(type == StructureType.database){
             manager.dropDatabase(name);
@@ -22,6 +23,5 @@ public class Drop extends CommandType{
         else{
             manager.getCurrDB().dropTable(name);
         }
-        System.out.println("[OK]");
     }
 }

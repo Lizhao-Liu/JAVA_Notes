@@ -12,6 +12,5 @@ public class Use extends CommandType{
     @Override
     public void execute(DatabaseManager manager) throws CommandExecutionException {
         manager.useDB(dbName);
-        System.out.println("[OK]");
     }
 }

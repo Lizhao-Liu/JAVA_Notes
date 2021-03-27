@@ -35,6 +35,8 @@ public class Row {
     public int getId(){
         return id;
     }
+
+    //set up the primary key placeholder of the row
     public void setUpPk(){
         Value pk = new Value();
         pk.setValueType(Value.ValueType.IntegerLiteral);
@@ -42,6 +44,7 @@ public class Row {
         row.add(pk);
     }
 
+    //set the value at the index of the row to a given value
     public void setValue(int index, Value value)
     {
         if(index >= row.size()) {
@@ -52,15 +55,18 @@ public class Row {
         }
     }
 
+    //add value to the row
     public void addValue(int columnIndex, Value value)
     {
         row.add(columnIndex, value);
     }
 
+    //delete the row
     public void delete(){
         isDeleted = true;
     }
 
+    //delete the value of the row if exists at the given index
     public void removeValue(int index)
     {
         if(index >= row.size()) return;
@@ -69,12 +75,14 @@ public class Row {
         }
     }
 
+    //get the value back from the row given the index
     public Value getValue(Integer index) throws CommandExecutionException{
         if(index >= row.size()) throw new CommandExecutionException("fail to update the value of column "+
                 table.getColumnByIndex(index).getName());
         return row.get(index);
     }
 
+    //change the row to a string for printing
     public String toString(){
         StringBuilder s = new StringBuilder();
         for (Value value : row) {

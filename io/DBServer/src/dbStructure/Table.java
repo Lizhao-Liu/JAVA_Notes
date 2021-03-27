@@ -3,14 +3,17 @@ package dbStructure;
 import exception.CommandExecutionException;
 import command.common.Value;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Table {
-    private TableWriter writer;
+    private File tbFile;
+    private TableWriter tableWriter;
     private Database database;
     private String path;
     private String name;
@@ -36,17 +39,17 @@ public class Table {
 
     // create the file of the table if it doesn't exist
     public void create() throws CommandExecutionException {
-        File tb = new File(this.path);
-        if (!tb.exists()) {
+        tbFile = new File(this.path);
+        if (!tbFile.exists()) {
             try {
-                tb.createNewFile();
+                tbFile.createNewFile();
             } catch (IOException e) {
                 throw new CommandExecutionException("fail to create the table" + name + " due to I/O problem");
             }
         } else {
             throw new CommandExecutionException("please delete the existing files using drop command first");
         }
-        writer = new TableWriter(this, path);
+        tableWriter = new TableWriter();
     }
 
     public void setDatabase(Database db){
@@ -98,7 +101,7 @@ public class Table {
         column.setIndex(columns.size());
         columnMap.put(name, columns.size());
         columns.add(column);
-        writeToTable();
+        tableWriter.writeToTable();
     }
 
     //add a list of columns to the table
@@ -114,7 +117,7 @@ public class Table {
                 throw new CommandExecutionException("column "+ target.getName()+" already exists");
             }
         }
-        writeToTable();
+        tableWriter.writeToTable();
     }
 
     //drop a column from the table
@@ -128,7 +131,7 @@ public class Table {
         }
         columns.remove(index);
         columnMap.remove(columnName);
-        writeToTable();
+        tableWriter.writeToTable();
     }
     //check if the table contains the column with the name specified
     public boolean containsColumn(String columnName) {
@@ -171,7 +174,7 @@ public class Table {
         idToRowMap.put(nextRowId, row);
         nextRowId++;
         //save the changed status to the file
-        writeToTable();
+        tableWriter.writeToTable();
     }
 
     //add the values to the row and check the types of values and the corresponding columns match
@@ -203,7 +206,7 @@ public class Table {
         idToRowMap.remove(id);
         rows.remove(row);
         rowToIdMap.remove(row);
-        writeToTable();
+        tableWriter.writeToTable();
     }
 
     //get the row back with the id specified
@@ -234,17 +237,37 @@ public class Table {
             column.setType(value.getValueType());
         }
         row.setValue(index, value);
-        writeToTable();
+        tableWriter.writeToTable();
     }
 
-    //update the table status to the file
-    public void writeToTable() throws CommandExecutionException
-    {
-        try {
-            writer.writeToTable();
-        } catch (IOException e) {
-            throw new CommandExecutionException("fail to save the data to table due to i/o problems");
+    //an helper class which can write the data to the table file
+    private class TableWriter {
+
+        public TableWriter() {}
+        //update the table status to the file
+        public void writeToTable() throws CommandExecutionException {
+            try {
+                BufferedWriter writer = new BufferedWriter(new FileWriter(tbFile));
+                StringBuilder s = new StringBuilder();
+                //write the column names to the table file;
+                for (int i = 0; i < getColNames().size(); i++) {
+                    s.append(getColNames().get(i)).append("\t");
+                }
+                writer.write(s.toString());
+                writer.write("\n");
+                //write the rows to the table file
+                StringBuilder row = new StringBuilder();
+                for (int i = 0; i < getRows().size(); i++) {
+                    row.append(getRows().get(i).toString());
+                    row.append('\n');
+                }
+                writer.write(row.toString());
+                writer.close();
+            }catch(IOException e){
+                throw new CommandExecutionException("fail to save the data to table due to i/o problems");
+            }
         }
+
     }
 
 }

@@ -1,5 +1,6 @@
 package command.common;
 
+//a class to storing a name value pair structure e.g. <AttributeName> = <Value>
 public class NameValuePair{
     String columnName;
     Value value;

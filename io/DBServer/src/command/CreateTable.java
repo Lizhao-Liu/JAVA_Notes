@@ -16,7 +16,9 @@ public class CreateTable extends CommandType{
     public void setTableName(String name){
         this.tableName = name;
     }
-    public void setAttrList(ArrayList<String> list){
+    //converting a list of column names to a list of column objects
+    public void setAttrList(ArrayList<String> list)
+    {
         for(int i=0 ; i < list.size(); i++){
             hasAttrList = true;
             Column column = new Column(list.get(i));
@@ -25,11 +27,13 @@ public class CreateTable extends CommandType{
     }
     @Override
     public void execute(DatabaseManager manager) throws CommandExecutionException {
+        //making sure the user choose a database before with the "USE XXX" command
         if(manager.getCurrDB()==null) throw new CommandExecutionException("please choose a database to work on at first");
+        //add the created table to the current working database
         Table tb = manager.getCurrDB().addTable(tableName);
+        //if there is a attribute list provided, set the columns of the table
         if(hasAttrList){
             tb.setColumns(attrList);
         }
-        System.out.println("[OK]");
     }
 }

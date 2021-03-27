@@ -8,7 +8,6 @@ public class Column {
     private Table table;
     //the ordinal position of this column in a row
     private int index;
-    //the following fields are optional
     private Value.ValueType type;
 
     public Column(String name){

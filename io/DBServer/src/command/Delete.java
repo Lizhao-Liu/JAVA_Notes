@@ -13,33 +13,21 @@ public class Delete extends CommandType{
     Table table;
     Condition condition;
     public Delete(){}
-
     public void setTableName(String tableName) {
         this.tableName = tableName;
     }
-
     public void setCondition(Condition condition) {
         this.condition = condition;
     }
 
-    public String getTableName() {
-        return tableName;
-    }
-
-    public Condition getCondition() {
-        return condition;
-    }
-
     @Override
     public void execute(DatabaseManager manager) throws CommandExecutionException {
-        output=new String();
+        output= "";
+        //get the table with the name provided
         table = manager.getCurrDB().getTable(tableName);
-        StringBuilder s = new StringBuilder();
-        for(String col:table.getColNames()){
-            s.append(col).append('\t');
-        }
-        s.append('\n');
+        //get the list of rows that match the condition
         ArrayList<Integer> deletedRowIds = condition.getRowList(table);
+        //walking through the returned row list and delete each row from the table
         for(int id: deletedRowIds){
             table.deleteARow(id);
         }

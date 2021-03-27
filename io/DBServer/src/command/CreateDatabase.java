@@ -10,7 +10,7 @@ public class CreateDatabase extends CommandType{
     }
     @Override
     public void execute(DatabaseManager manager) throws CommandExecutionException {
+        //create the new database to the current manager
         manager.addDatabase(DbName);
-        System.out.println("[OK]");
     }
 }

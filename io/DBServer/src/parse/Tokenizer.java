@@ -60,6 +60,7 @@ public class Tokenizer {
         throw new InvalidTokenException("invalid token" + curr);
     }
 
+    ////set up the token content as the symbol and the type as symbol
     public Token nextSymbol(char curr)
     {
         Token token = new Token();
@@ -72,6 +73,7 @@ public class Tokenizer {
         return token;
     }
 
+    //set up the token type as float and save the content if the next string is a float number string
     public Token nextFloat()
     {
         int count= 0;
@@ -90,6 +92,7 @@ public class Tokenizer {
         return token;
     }
 
+    //set up the next token content as the next string and the type as alphanumeric
     public Token nextString(){
         StringBuilder s = new StringBuilder();
         while(pos<length&&(isLetter(currLine[pos])||isDigital(currLine[pos]))){
@@ -101,6 +104,7 @@ public class Tokenizer {
         return token;
     }
 
+    //set up the token content as the string inside the single quotes and set up the token type as StringLiteral
     public Token nextQuoteLine() throws InvalidTokenException{
         StringBuilder s = new StringBuilder();
         pos++;

@@ -208,12 +208,16 @@ public class Parser {
 
 
 
-    //          ****************************AUXILIARY FUNCTIONS****************************
+    //          ****************************AUXILIARY FUNCTIONS BELOW*****************************
+
+    //check if the next string is the keyword
     void getKeyword(String keyword) throws InvalidQueryException  {
         if(!tokenizer.nextToken().getContent().equalsIgnoreCase(keyword)) {
             throw new InvalidQueryException("invalid query: missing keyword: "+keyword);
         }
     }
+
+    //get a column/table/database name which should be alphanumeric
     String getAName(Token token) throws InvalidQueryException
     {
         if(!token.isAlphanumeric){
@@ -221,6 +225,8 @@ public class Parser {
         }
         return token.getContent();
     }
+
+    //check if the next token is a semi colon
     void getTerminator(Token token) throws InvalidQueryException
     {
         if(token.isEndSymbol){
@@ -230,6 +236,8 @@ public class Parser {
             throw new InvalidQueryException("terminator missing");
         }
     }
+
+    // parse the condition part of the query
     // BNF: ( <Condition> ) AND ( <Condition> )  |
     //      ( <Condition> ) OR ( <Condition> )   |
     //      <AttributeName> <Operator> <Value>
@@ -238,8 +246,9 @@ public class Parser {
         return new Condition(conditionList);
     }
 
+    //check the condition format and convert it to a list of object to prepare for converting the list to a binary search tree
     ArrayList<Object> getConditionList() throws InvalidQueryException  {
-        Stack stack = new Stack();
+        Stack stack = new Stack();//using stack to check if the brackets match
         ArrayList<Object> recordList = new ArrayList<>();
         Token curr;
         int pos=0, separator=0;
@@ -248,12 +257,15 @@ public class Parser {
             if(curr.isEmpty){
                 throw new InvalidQueryException("invalid query: expected ;");
             }
+            //push a "(" to stack if there is a left bracket and add it to the list
             if(curr.getContent().equals("(")){
                 stack.push("(");
                 recordList.add("(");
                 pos++;
                 continue;
             }
+
+            //poop a ")" from the stack if there is a right bracket and add it to the list
             if(curr.getContent().equals(")")){
                 if(stack.isEmpty()){throw new InvalidQueryException("invalid query: brackets not match");}
                 recordList.add(")");
@@ -261,7 +273,11 @@ public class Parser {
                 stack.pop();
                 continue;
             }
+
+            // if there is an operator, add it to the list
             if(curr.getContent().equalsIgnoreCase("AND")||curr.getContent().equalsIgnoreCase("OR")){
+                //making sure the brackets are formatted correctly
+                //there should be only one operator out of all the brackets
                 if(stack.isEmpty()){
                     if(separator!=0) throw new InvalidQueryException("missing brackets");
                     separator = pos;
@@ -269,16 +285,19 @@ public class Parser {
                 recordList.add(curr.getContent());
                 pos++;
             }
+            //set up the single expression and add it to the list
             else if(curr.isAlphanumeric){
                 recordList.add(getSingleExpr(curr));
                 pos++;
             }
             else throw new InvalidQueryException("invalid query, unexpected "+ curr.getContent());
         }
+        //the number of left brackets should be equal to the number of right bracketes
         if(!stack.isEmpty()) throw new InvalidQueryException("invalid query: brackets not match");
         return recordList;
     }
 
+    //set up the single expression
     SingleExpr getSingleExpr(Token token) throws InvalidQueryException  {
         SingleExpr singleExpr = new SingleExpr();
         singleExpr.setColumnName(getAName(token));
@@ -287,9 +306,11 @@ public class Parser {
         return singleExpr;
     }
 
+    //get the operator and check if it is used with proper values following
     SingleExpr.OperatorType getOperator(Token token) throws InvalidQueryException  {
         if(token.getContent().equals("LIKE")){
             String next = tokenizer.peek().getContent();
+            //the value should not be a integer or float after the operator "LIKE"
             if(isIntegerLiteral(next)||isFloatLiteral(next)){
                 throw new InvalidQueryException("Invalid query: String expected after LIKE");
             }
@@ -302,6 +323,7 @@ public class Parser {
             tokenizer.nextToken();
         }
         SingleExpr.OperatorType type = getSymbolOperator(operator);
+        //if the value is of boolean or string type, the operator should only be  <, >, <=, >=
         if(isBooleanLiteral(token.getContent()) || token.isStringLiteral){
             if(type!= SingleExpr.OperatorType.EQUAL && type!= SingleExpr.OperatorType.NOTEQUAL){
                 throw new InvalidQueryException("expected numerical value after <, >, <=, >= but found "+ token.getContent());
@@ -321,6 +343,7 @@ public class Parser {
         throw new InvalidQueryException("invalid query: expected an operator but found "+ s);
     }
 
+    //get the list of attributes separated by comma before the right bracket
     ArrayList<String> getAttrList(String endOfList) throws InvalidQueryException  {
         ArrayList<String> attrList = new ArrayList<>();
         //curr starts at the first string of the attribute list
@@ -332,12 +355,16 @@ public class Parser {
             if(curr.isEmpty|| curr.isEndSymbol){
                 throw new InvalidQueryException("invalid query: missing "+ endOfList);
             }
+            //if there is a comma, add the last attribute name to the list
             else if (curr.getContent().equals(",")) {
+                //check the format is correct
+                //every time it meets a comma, there should be one and only one attribute name waited to be added
                 isValidInsertion(toBeAdded);
                 attrList.add(attrName);
                 toBeAdded--;
                 continue;
             }
+            //get the attribute name back and check if it is alphanumeric
             attrName = getAName(curr);
             toBeAdded++;
         }
@@ -369,6 +396,7 @@ public class Parser {
         return list;
     }
 
+    //get the list of attributes separated by comma before the ending symbol of the list
     ArrayList<NameValuePair> getNameValueList(String endOfList) throws InvalidQueryException  {
         ArrayList<NameValuePair> list = new ArrayList<>();
         Token curr;
@@ -384,6 +412,7 @@ public class Parser {
                 toBeAdded--;
                 continue;
             }
+            //set up the next part to a name value pair
             pair=setUpNameValuePair(curr);
             toBeAdded++;
         }
@@ -392,6 +421,7 @@ public class Parser {
         return list;
     }
 
+    //set up name value pair <attribute name> = <value>
     NameValuePair setUpNameValuePair(Token curr) throws InvalidQueryException  {
         NameValuePair pair = new NameValuePair();
         pair.setColumnName(getAName(curr));
@@ -402,6 +432,7 @@ public class Parser {
         return pair;
     }
 
+    //set up value
     Value setUpValue(Token curr) throws InvalidQueryException
     {
         Value value = new Value();
@@ -426,6 +457,7 @@ public class Parser {
                 " <BooleanLiteral> , <FloatLiteral> , <IntegerLiteral>");
     }
 
+    //during the parsing process in a list, every time it meets a comma, there should be one and only one attribute name waited to be added
     void isValidInsertion(int toBeAdded) throws InvalidQueryException
     {
         if(toBeAdded == 1) return;
@@ -459,7 +491,7 @@ public class Parser {
 
     public static void main(String[] args){
         DatabaseManager manager = new DatabaseManager();
-        String[] incomingCommands = {"CREATE DATABASE markbook;", "USE markbook;", "CREATE TABLE marks (name, mark, pass);"};
+        String[] incomingCommands = {"Drop DATABASE markbook;", "CREATE DATABASE markbook;", "USE markbook;", "CREATE TABLE marks (name, mark, pass);", "INSERT INTO marks VALUES ('ll', 22, true);" };
         for(int i =0; i < incomingCommands.length; i++){
             Parser parser = new Parser(incomingCommands[i]);
             try {
@@ -468,7 +500,6 @@ public class Parser {
                 System.out.println("OK");
             } catch (DBException e) {
                 System.out.println(e);
-                System.exit(1);
             }
         }
 

@@ -1,5 +1,6 @@
 package command.common;
 
+//a class to store the values
 public class Value {
     ValueType valueType;
     String content;
@@ -16,6 +17,7 @@ public class Value {
     public String getContent(){
         return content;
     }
+    //get the float back if the stored value is a float or integer
     public Float getFloat(){
         return Float.parseFloat(content);
     }
