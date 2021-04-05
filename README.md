@@ -39,4 +39,4 @@ Notes and exercises for the course Object Oriented Programming with Java
 
 # Projects
 - [X] [OXO Game](https://github.com/Lizhao-Liu/JAVA_Notes/tree/main/Polymorphism%20and%20Collections%20%26%20Error%20Handling/OXO)
-- [X] [DB Server]()
+- [X] [DB Server](https://github.com/Lizhao-Liu/JAVA_Notes/tree/main/io/DBServer)
