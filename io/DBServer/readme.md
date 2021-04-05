@@ -10,18 +10,29 @@
 ### Supported SQL Keywords:
 
 USE: changes the database against which the following queries will be run
+
 CREATE: constructs a new database or table (depending on the provided parameters)
+
 INSERT: adds a new entity to an existing table
+
 SELECT: searches for entities that match the given condition
+
 UPDATE: changes the data contained within a table
+
 ALTER: changes the structure (rows) of an existing table
+
 DELETE: removes entities that match the given condition from an existing table
+
 DROP: removes a specified table from a database, or removes the entire database
+
 AND / OR: allows conditions to be combined (makes use of parentheses to define ordering)
+
 LIKE: used for comparing partial substrings in conditions
+
 JOIN: performs an inner join on two tables (returning all permutations of all matching entities)
 
-## RUN:
+
+## TO RUN:
 1. Go to the DBServer folder.
 2. Compile with `javac DBServer`.
 3. Run `java DBServer`.
