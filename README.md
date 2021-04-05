@@ -29,7 +29,7 @@ Notes and exercises for the course Object Oriented Programming with Java
   - [Notes](https://github.com/Lizhao-Liu/JAVA_Notes/tree/main/code_quality)
  
 - [X] [06 DB Assignment](https://github.com/drslock/JAVA2020/tree/main/Weekly%20Workbooks/06%20Briefing%20on%20DB%20assignment)
-  - [Notes]()
+  - [Notes](https://github.com/Lizhao-Liu/JAVA_Notes/tree/main/io)
 
 - [ ] [07 Canvas Graphics](https://github.com/drslock/JAVA2020/tree/main/Weekly%20Workbooks/07%20Canvas%20Graphics)
   - [Notes]()
