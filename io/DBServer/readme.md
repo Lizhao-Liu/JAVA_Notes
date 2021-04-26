@@ -41,3 +41,14 @@ JOIN: performs an inner join on two tables (returning all permutations of all ma
 3. Run `java DBServer`.
 4. The database server will listen on port 8888 and receive incoming messages.
 5. The database data will be stored in the "database" folder.
+
+
+## To Improve:
+1. method names are potentially problematic in that they are just single words, start with an uppercase letter and don't conform to recommendations (they aren't verbs, checks or event handlers)
+2. blank lines to clearly separate methods
+3. Cyclic dependencies
+4. high density of IF/CASE statements: SingleExpr.isTarget(), Parser.parseCommand() and Parser.getConditionList(). 
+5. complex structures:
+6. tightly coupled pairs of classes (SingleExpr<->Value, Table<->Column, Parser<->Tokenizer and Parser<->Token) which may benefit from refactoring to improve encapsulation and separation.
+7.  access global variables
+8.  Remember to keep your code DRY !
