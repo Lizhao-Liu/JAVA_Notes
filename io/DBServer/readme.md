@@ -1,4 +1,4 @@
-# Database Server JAVA Assignment
+# Database Server
 
 
 ## DESCRIPTION:
